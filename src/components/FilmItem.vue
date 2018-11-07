@@ -1,6 +1,6 @@
 <template>
     <!-- 电影展示组件 start -->
-    <router-link class="film-item" tag="div" :to="'/detail/'+film.filmId">
+    <router-link class="film-item" tag="div" :to="{ name:'detailpage', params:{ filmId:film.filmId } }" >
         <div class="film-img" v-lazy=" film.filmImg " ></div>
         <div class="film-title">{{ film.filmName }}</div>
         <div class="film-source">

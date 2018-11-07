@@ -6,11 +6,11 @@
             <div class="user-input" @click.stop>
                 <h4>头像</h4>
                 <ul class="user-head" onclick="userChoose(this,event)">
-                    <li v-for="i in 24" :key="'img'+i" :style="`background-image: url(../../static/imgs/users/user${i}.png)`" ></li>
-                 <!-- class="user-choose" data-img="user1.png"  -->
+                    <li v-for="i in 24" :key="'img'+i" :style="`background-image: url(../../static/imgs/users/user${i}.png)`"></li>
+                    <!-- class="user-choose" data-img="user1.png"  -->
                 </ul>
                 <h4>昵称</h4>
-                <input class="user-nikename" type="text" placeholder="昵称">
+                <input class="user-nikename" type="text" placeholder="昵称" v-model="username">
                 <h4>评分</h4>
                 <div class="film-source reset-star">
                     <!-- <span class="star-img open"></span>
@@ -19,13 +19,13 @@
                     <span class="star-img close"></span>
                     <span class="star-img close"></span>
                     <span class="star-source">7.9</span> -->
-                    <rate id="sourceself" v-model=" source " show-score :score-template=" source | formatNum" ></rate>
+                    <rate id="sourceself" v-model=" userSource " show-score :score-template=" userSource | formatNum"></rate>
                 </div>
                 <h4>评论</h4>
-                <textarea class="user-message" placeholder="留下点足迹..."></textarea>
+                <textarea class="user-message" placeholder="留下点足迹..." v-model="userMsg"></textarea>
                 <div class="send-btn">
                     <span @click=" flag=false ">关闭</span>
-                    <span>发送</span>
+                    <span @click=" sendCom() ">发送</span>
                 </div>
             </div>
         </div>
@@ -34,31 +34,67 @@
 </template>
 
 <script>
-    export default{
-        data(){
-            return{
+    export default {
+        data() {
+            return {
                 flag: false,
-                source:5,
+                userSource: 5,
+                filmId: "",
+                username: "",
+                userMsg: ""
             }
         },
-        filters:{
-            formatNum(value){
+        filters: {
+            formatNum(value) {
                 return (value * 1).toFixed(1);
             }
+        },
+        methods: {
+            sendCom() {
+                this.$api.insertComment({
+                    username: this.username,
+                    userImg: "user2.png",
+                    userSource: this.userSource,
+                    userMsg: this.userMsg,
+                    filmId: this.filmId,
+
+                }).then(({ status, data }) => {
+                    if (status == 200) {
+                        let id = this.filmId;
+                        this.flag = false;
+                        this.$router.push({
+                            path: "/detail",
+                            query: {
+                                fid: Math.random(),
+                            }
+                        });
+                        return;
+                    }
+                    return Promise.reject();
+                }).catch(() => {
+                    alert("请求失败")
+                });
+            },
+        },
+        mounted() {
+            this.$root.$on("send:id", (b) => {
+                this.filmId = b;
+                // console.log(b)
+            })
         }
     }
 </script>
 
 <style lang="less">
     @import "../var.less";
-    .footer-box{
-    position: absolute;
-    bottom: 0rem;
-    // background-color: red;
-    height: @bottomHeight;
-    width: 100%;
-    border-top: 1px solid @gray-light;
-    >.comment-input{
+    .footer-box {
+      position: absolute;
+      bottom: 0rem;
+      // background-color: red;
+      height: @bottomHeight;
+      width: 100%;
+      border-top: 1px solid @gray-light;
+      > .comment-input {
         font-size: 0.24rem;
         margin: 0.2rem;
         background-color: @gray-ee;
@@ -68,8 +104,8 @@
         cursor: pointer;
         color: @gray;
         padding: 0rem 0.2rem;
-    }
-    >.comment-detail{
+      }
+      > .comment-detail {
         position: fixed;
         bottom: 0rem;
         top: 0rem;
@@ -78,126 +114,125 @@
         margin: 0 auto;
         max-width: 750px;
         // display: none;
-        background-color:fade(black,50%);
-        >.user-input{
-            position: absolute;
-            bottom: 0rem;
-            max-height: 100%;
-            left: 0rem;
-            right: 0rem;
-            padding: 0.2rem;
-            background-color: #f8f9fa;
-            overflow-y: auto;
+        background-color: fade(black, 50%);
+        > .user-input {
+          position: absolute;
+          bottom: 0rem;
+          max-height: 100%;
+          left: 0rem;
+          right: 0rem;
+          padding: 0.2rem;
+          background-color: #f8f9fa;
+          overflow-y: auto;
+          box-sizing: border-box;
+          > h4 {
+            font-size: 0.28rem;
+            font-weight: normal;
+            // padding: 0.1rem;
+            color: @gray;
+            padding-bottom: 0.1rem;
+          }
+          > .user-head {
+            list-style: none;
+            font-size: 0rem;
+            width: 100%;
+            overflow-y: scroll;
+            height: 2rem;
+            background-color: #ddd;
+            border-radius: 0.2rem;
+            margin-bottom: 0.2rem;
+            > li {
+              display: inline-block;
+              background-repeat: no-repeat;
+              width: 0.8rem;
+              height: 0.8rem;
+              margin: 0.1rem;
+              box-sizing: border-box;
+              background-size: cover;
+              border-radius: 50%;
+              vertical-align: top;
+            }
+            > .user-choose::after {
+              content: "";
+              background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+2XP2gTcRTHv+9CaxqL7R0uIh2UpJuboEInKQjOFpwEKR3SiIOuIkJX16SNS6SgoIugqIjiIOgibnbpWSuCpUjJpbXYlib35BoibbjL/Xl36QUuY/i9x/fzvu+b3y+EHv9Qj+tHAnDYDiYOJA4IJ5CskHCA4vLEAfEInRrcY2X4uD6GFCnM/HN9evS73dF4OlD8PahR7RlA45ZoZuwAmDAKuRftEPEDsMSj9g5E5/aLZfCaMdA3guuntvd/Hy8AB/EtwUx0xshnv8YToLyS0eqb79sn/188w6QG1OrN3Eb8AMorGbW++YaIxhx/FJhmqoXs3fhlwIt4oFLNZydBxPECEIq3YA4vxCGI7whwbG4pp7B5kkylbkyf/mhnX+BLrLKcVv/uvu248x3WxjXEWkmfYPAjAvU1LxJ+ZewMXMGtka3AoluFleW0tlV/CeBih16OO++egfnVo9qfjVUQDR68SPDJ2E6PiyBCFm+7QkNzS2dTpvnZbjoMAUQE4m0BMuUfJ440dn+RQ8ADQUQk3jHEw0X9vkK47bSjviCeLvRra/2vw9p59ww0U0vqrP6YQFdFEE3xzwFcCiOw/p7TUoguiHe/yIJCdEm8O0BrnUrfHhLhmqd16qJ4bwA+IJBSLlPDfBLlznsLse0lwKS6O7FOwFBUgfUX4oAQ3RTvfYUOvCn2nCgTYcrHu8jz28ZHz72jgZ/TalF/4BEiMvEiAKvYA0Sk4sUALhCRiw8FwGqilRZnALrT2l8GZo18thDqnyCHcATOQHs/raSfB+OCyfyldmP0g98wBj0fGkBQAdK6BEA6QWl94oB0gtL6xAHpBKX1iQPSCUrre96Bfz9PREAFqyCcAAAAAElFTkSuQmCC);
+              display: inline-block;
+              width: 0.8rem;
+              height: 0.8rem;
+              background-repeat: no-repeat;
+              background-size: 80%;
+              background-position: center;
+              background-color: fade(black, 70%);
+              border-radius: 50%;
+            }
+          }
+          > .user-nikename {
             box-sizing: border-box;
-            >h4{
-                font-size: 0.28rem;
-                font-weight: normal;
-                // padding: 0.1rem;
-                color: @gray;
-                padding-bottom: 0.1rem;
+            border: none;
+            background-color: #ddd;
+            display: block;
+            font-size: 0.24rem;
+            padding: 0.2rem 0.2rem;
+            width: 100%;
+            border-radius: 0.2rem;
+            outline: none;
+            margin-bottom: 0.2rem;
+          }
+          > .reset-star {
+            margin-bottom: 0.2rem;
+            > span {
+              height: 0.4rem !important;
+              width: 0.4rem !important;
+              line-height: 0.4rem !important;
             }
-            >.user-head{
-                list-style: none;
-                font-size: 0rem;
-                width: 100%;
-                overflow-y: scroll;
-                height: 2rem;
-                background-color: #ddd;
-                border-radius: 0.2rem;
-                margin-bottom: 0.2rem;
-                >li{
-                    display: inline-block;
-                    background-repeat: no-repeat;
-                    width: 0.8rem;
-                    height: 0.8rem;
-                    margin: 0.1rem;
-                    box-sizing: border-box;
-                    background-size: cover;
-                    border-radius: 50%;
-                    vertical-align: top;
-                }
-                >.user-choose::after{
-                    content: "";
-                    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+2XP2gTcRTHv+9CaxqL7R0uIh2UpJuboEInKQjOFpwEKR3SiIOuIkJX16SNS6SgoIugqIjiIOgibnbpWSuCpUjJpbXYlib35BoibbjL/Xl36QUuY/i9x/fzvu+b3y+EHv9Qj+tHAnDYDiYOJA4IJ5CskHCA4vLEAfEInRrcY2X4uD6GFCnM/HN9evS73dF4OlD8PahR7RlA45ZoZuwAmDAKuRftEPEDsMSj9g5E5/aLZfCaMdA3guuntvd/Hy8AB/EtwUx0xshnv8YToLyS0eqb79sn/188w6QG1OrN3Eb8AMorGbW++YaIxhx/FJhmqoXs3fhlwIt4oFLNZydBxPECEIq3YA4vxCGI7whwbG4pp7B5kkylbkyf/mhnX+BLrLKcVv/uvu248x3WxjXEWkmfYPAjAvU1LxJ+ZewMXMGtka3AoluFleW0tlV/CeBih16OO++egfnVo9qfjVUQDR68SPDJ2E6PiyBCFm+7QkNzS2dTpvnZbjoMAUQE4m0BMuUfJ440dn+RQ8ADQUQk3jHEw0X9vkK47bSjviCeLvRra/2vw9p59ww0U0vqrP6YQFdFEE3xzwFcCiOw/p7TUoguiHe/yIJCdEm8O0BrnUrfHhLhmqd16qJ4bwA+IJBSLlPDfBLlznsLse0lwKS6O7FOwFBUgfUX4oAQ3RTvfYUOvCn2nCgTYcrHu8jz28ZHz72jgZ/TalF/4BEiMvEiAKvYA0Sk4sUALhCRiw8FwGqilRZnALrT2l8GZo18thDqnyCHcATOQHs/raSfB+OCyfyldmP0g98wBj0fGkBQAdK6BEA6QWl94oB0gtL6xAHpBKX1iQPSCUrre96Bfz9PREAFqyCcAAAAAElFTkSuQmCC);
-                    display: inline-block;
-                    width: 0.8rem;
-                    height: 0.8rem;
-                    background-repeat: no-repeat;
-                    background-size: 80%;
-                    background-position: center;
-                    background-color: fade(black,70%);
-                    border-radius: 50%;
-                }
+            > .star-source {
+              font-size: 0.52rem !important;
+              color: @gray!important;
             }
-            >.user-nikename{
-                box-sizing: border-box;
-                border: none;
-                background-color:#ddd;
-                display: block;
-                font-size: 0.24rem;
-                padding: 0.2rem 0.2rem;
-                width: 100%;
-                border-radius: 0.2rem;
-                outline: none;
-                margin-bottom: 0.2rem;
+          }
+          .user-message {
+            outline: none;
+            border: none;
+            display: block;
+            width: 100%;
+            background-color: #ddd;
+            font-size: 0.24rem;
+            padding: 0.2rem 0.2rem;
+            border-radius: 0.2rem;
+            box-sizing: border-box;
+            height: 2rem;
+            margin-bottom: 0.2rem;
+            resize: none;
+          }
+          .send-btn {
+            color: @gray;
+            font-size: 0.3rem;
+            &::after {
+              content: "";
+              display: block;
+              clear: both;
             }
-            >.reset-star{
-                margin-bottom: 0.2rem;
-                >span{
-                    height: 0.4rem!important;
-                    width: 0.4rem!important;
-                    line-height: 0.4rem!important;
-                }
-                >.star-source{
-                    font-size:0.52rem!important;
-                    color: @gray!important;
-                }
+            > span {
+              padding: 0.1rem 0.2rem;
+              cursor: pointer;
             }
-            .user-message{
-                outline: none;
-                border: none;
-                display: block;
-                width: 100%;
-                background-color:#ddd;
-                font-size: 0.24rem;
-                padding: 0.2rem 0.2rem;
-                border-radius: 0.2rem;
-                box-sizing: border-box;
-                height: 2rem;
-                margin-bottom: 0.2rem;
-                resize: none;
+            > .span:first-child {
+              float: left;
             }
-            .send-btn{
-                color: @gray;
-                font-size: 0.3rem;
-                &::after{
-                    content: "";
-                    display: block;
-                    clear: both;
-                }
-                >span{
-                    padding: 0.1rem 0.2rem;
-                    cursor: pointer;
-                }
-                >.span:first-child{
-                    float: left;
-                }
-                >.span:last-child{
-                    float: right;
-                }
+            > .span:last-child {
+              float: right;
             }
+          }
         }
+      }
     }
-}
 </style>
 <style lang="less">
-    #sourceself{
-        >span{
-            >i{
-                font-size:25px !important
-            }
-            
+    #sourceself {
+      > span {
+        > i {
+          font-size: 25px !important;
         }
+      }
     }
 </style>
 

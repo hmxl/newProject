@@ -5,7 +5,7 @@
         <!-- <type-list-page class="content-box"></type-list-page> -->
         <!-- <detail-page class="content-box"></detail-page> -->
         <router-view class="content-box"></router-view>
-        <footter-bar></footter-bar>
+        <footter-bar v-show=" showFootter "></footter-bar>
     </div>
 </template>
 
@@ -15,10 +15,23 @@
     import TypeListPage from './pages/TypeListPage';
     import DetailPage from './pages/DetailPage';
     import FootterBar from './components/FootterBar'
+
     export default {
+        data() {
+            return {
+                showFootter: false
+            }
+        },
         components: {
             NavBar, HomePage, TypeListPage, DetailPage, FootterBar
+        },
+        watch: {
+            "$route.meta.showFootter": function () {
+                // console.log(this.$route.meta.showFootter);
+                this.showFootter = this.$route.meta.showFootter;
+            }
         }
+
 
     };
 </script>

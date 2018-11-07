@@ -2,10 +2,10 @@
     <!-- 头部搜索框 start -->
     <nav class="nav-box">
         <div class="nav-input">
-            <input id="userInput" type="text" @focus=" flag=true " @blur=" flag=false ">
+            <input id="userInput" type="text" v-model="keywords" @focus=" flag=true " @blur=" flag=false ">
         </div>
         <div id="seachBtn" class="nav-btn" v-show=" flag ">
-            <span>搜索</span>
+            <span @click=" search() ">搜索</span>
         </div>
     </nav>
     <!-- 头部搜索框 end -->
@@ -13,9 +13,24 @@
 
 <script>
     export default {
-        data(){
+        data() {
             return {
-                flag:false
+                flag: false,
+                keywords: ''
+            }
+        },
+        methods: {
+            search() {
+                var temp = this.keywords;
+                this.keywords = "";
+                this.$router.push({
+                    path: "/list",
+                    query: {
+                        wd: temp,
+                        //   typeId:this.$route.params.typeId
+                    }
+                });
+                // console.log(this.$router);
             }
         }
     }

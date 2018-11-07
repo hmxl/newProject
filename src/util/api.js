@@ -6,7 +6,8 @@ const requestUrl = {
     type:"/workspace/filmApi/loadTyps.php",
     films:"/workspace/filmApi/loadFilms.php",
     details:"/workspace/filmApi/loadFilmById.php",
-    comments:"/workspace/filmApi/loadCommentById.php"
+    comments:"/workspace/filmApi/loadCommentById.php",
+    insert:"/workspace/filmApi/insertComment.php",
 };
 
 const loadTypes = function(){
@@ -25,6 +26,10 @@ const loadComments = function(params){
     return axios.post(baseUrl+requestUrl.comments, Qs.stringify(params));
 }
 
+const insertComment = function(params){
+    return axios.post(baseUrl+requestUrl.insert, Qs.stringify(params));
+}
+
 export default{
-    loadTypes,loadFilmList,loadDetails,loadComments
+    loadTypes,loadFilmList,loadDetails,loadComments,insertComment
 }

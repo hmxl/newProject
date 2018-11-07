@@ -72,12 +72,12 @@
 
 <script>
     export default {
-        props:["filmId"],
+        props: ["filmId"],
         data() {
             return {
                 detail: [],
                 comments: [],
-                num:null
+                num: null
             }
         },
         computed: {
@@ -96,20 +96,30 @@
                 return (value * 1).toFixed(1);
             }
         },
+        watch:{
+            "$route.query.fid":function(){
+                console.log(111);
+                this.getDetails();
+                this.getComments();
+            }
+        },
         methods: {
             getDetails() {
+                console.log("getDetails")
                 this.$api.loadDetails({
                     filmId: this.filmId
                 }).then(({ status, data }) => {
                     // console.log(status, data);
                     if (status == 200 && data.resultState) {
                         this.detail = data.result;
+                        return;
                     }
                 }).catch((error) => {
                     console.log(error);
                 });
             },
-            getComments(){
+            getComments() {
+                console.log("getComments")
                 this.$api.loadComments({
                     filmId: this.filmId
                 }).then(({ status, data }) => {
@@ -117,15 +127,20 @@
                     if (status == 200 && data.resultState) {
                         this.comments = data.result;
                         this.num = data.result.length;
+                        return;
                     }
                 }).catch((error) => {
                     console.log(error);
                 });
+            },
+            sendFilmId() {
+                this.$root.$emit("send:id", this.filmId);
             }
         },
         mounted() {
             this.getDetails();
             this.getComments();
+            this.sendFilmId();
         }
     }
 </script>

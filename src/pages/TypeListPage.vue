@@ -31,6 +31,11 @@
         components: {
             FilmItem
         },
+        watch:{
+            "$route.query.wd":function(){
+                this.getList();
+            }   
+        },
         methods: {
             getList() {
                 let obj={
@@ -38,6 +43,10 @@
                 };
                 if(this.typeId){
                     obj.typeId = this.typeId;
+                };
+                if(this.$route.query.wd){
+                    console.log(this.$route.query.wd)
+                    obj.seach = this.$route.query.wd;
                 }
                 this.$api.loadFilmList(obj).then(({ status, data }) => {
                     if (status == 200 && data.resultState) {
